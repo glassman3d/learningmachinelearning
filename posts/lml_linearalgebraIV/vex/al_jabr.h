@@ -8,31 +8,27 @@ sam@learning-machine-learning.com
 #ifndef __al_jabr__
 #define __al_jabr__
 
-function vector4 [] aj_prim_shape(int num_sides; float shape_scale;)
+function vector [] aj_prim_shape(int num_sides; float shape_scale;)
 {
-    vector4 pts[];
-    vector4 startP = {0,0,1,1};
-    float theta;
-    matrix R;
-    vector rotation = {0,0,0};
-    vector position = {0,0,0};
-    vector scale = {1,1,1};
+    vector pts[];
+    vector startP = {0,0,1};
 
     for(int i=0; i<=num_sides; i++)
     {
-      theta = i * (360/num_sides);
+      float theta = i * (360/num_sides);
+      vector rotation = {0,0,0};
       rotation.y = theta;
-      R = maketransform( 0,0,position, rotation, scale, position );
+      matrix R = maketransform( 0 ,0, {0,0,0}, rotation, {1,1,1}, {0,0,0} );
       append(pts, startP*R);
     }
 
     return pts;
 }
 
-function vector4 [] aj_transform_pts(vector4 pts[]; matrix transformation)
+function vector [] aj_transform_pts(vector pts[]; matrix transformation)
 {
-    vector4 trans_pts[];
-    foreach(vector4 pt; pts)
+    vector trans_pts[];
+    foreach(vector pt; pts)
     {
 
         append(trans_pts, pt*transformation);
@@ -41,12 +37,12 @@ function vector4 [] aj_transform_pts(vector4 pts[]; matrix transformation)
     return trans_pts;
 }
 
-function void aj_add_prim_edges(vector4 pts[]; int shape_id; vector color)
+function void aj_add_prim_edges(vector pts[]; int shape_id; vector color)
 {
     int tmp;
     int pr = addprim(geoself(),"poly");
 
-    foreach(vector4 pt; pts)
+    foreach(vector pt; pts)
     {
         tmp = addpoint(geoself(),vector(pt));
         addvertex(geoself(),pr,tmp);
@@ -56,17 +52,16 @@ function void aj_add_prim_edges(vector4 pts[]; int shape_id; vector color)
 
 }
 
-function void aj_add_edges(vector4 pts[]; int num_sides)
+function void aj_add_edges(vector pts[]; int num_sides)
 {
 
     float iterations = len(pts) / (num_sides/2);
-    //printf("%g", iterations );
 
-    vector4 pt;
+    vector pt;
     for( int i=0; i<iterations; i++ )
     {
 
-       vector4 shape_pts[];
+       vector shape_pts[];
        for(int j=0;j<=num_sides;j++)
        {
            append(shape_pts, pop(pts));
@@ -76,21 +71,18 @@ function void aj_add_edges(vector4 pts[]; int num_sides)
     }
 }
 
-function vector4 [] al_jabr_layer()
+function vector [] al_jabr_layer()
 {
-    vector4 pts[];
-    vector4 shape_pts[] = aj_prim_shape(5,1);
-    vector position = {0,0,0};
-    vector rotation = {0,0,0};
-    vector pivot = {0,0,0};
-    vector scale = {1,1,1};
-    matrix tmp_matrix;
+    vector pts[];
+    vector shape_pts[] = aj_prim_shape(5,1);
+
     for(int i=0;i<10;i++)
     {
-
+            vector position = {0,0,0};
+            vector rotation = {0,0,0};
             position.x = i*1;
             rotation.y = i*90;
-            tmp_matrix = maketransform( 0, 0, position, rotation, scale, pivot );
+            matrix tmp_matrix = maketransform( 0, 0, position, rotation, {1,1,1}, {0,0,0} );
             append(pts, aj_transform_pts(shape_pts,tmp_matrix));
 
     }
@@ -101,18 +93,18 @@ function void aj_al_jabr()
 {
 
   // initial layer with offset
-  vector4 pts[] = al_jabr_layer();
+  vector pts[] = al_jabr_layer();
   matrix trans = ident();
   translate( trans,{-4.52447,0,0});
   pts = aj_transform_pts(pts,trans);
   matrix sc = ident();
   scale( sc, {1,1,-1});
-  vector4 rot_pts[] = aj_transform_pts(pts,sc);
+  vector rot_pts[] = aj_transform_pts(pts,sc);
   append(pts,rot_pts);
 
 
   // multiple layers
-  vector4 final_pts[];
+  vector final_pts[];
   vector m_trans = {0,0,0};
   vector m_rot = {0,0,0};
 
